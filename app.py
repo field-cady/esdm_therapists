@@ -66,6 +66,12 @@ def create_tooltip_html(loc):
 
 def main():
     st.title("📍 ESDM Therapists")
+
+    st.markdown(
+        "ESDM (Early Start Denver Model) is a play-based therapy for children on the autism spectrum.  "
+        "This app is designed to help you find providers."
+    )
+    
     st.markdown(
         "Click on any marker to see contact information for providers in that city.  "
         "This data was pulled from the [ESDM website](https://www.esdm.co/esdm-therapists)  "
