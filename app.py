@@ -79,6 +79,8 @@ def main():
         "resources for their children.  Please contact him with questions or feedback.")
 
     st.markdown("Sorry if it takes a minute to load!")
+
+    st.markdown("The data was last updated Feb 16, 2026.")
     
     # Load data
     contacts = load_contacts()
