@@ -71,6 +71,8 @@ def main():
         "This data was pulled from the [ESDM website](https://www.esdm.co/esdm-therapists)  "
         "It was made by Field Cady (field.cady@gmail.com) to help other autism parents find  "
         "resources for their children.  Please contact him with questions or feedback.")
+
+    st.markdown("Sorry if it takes a minute to load!")
     
     # Load data
     contacts = load_contacts()
