@@ -57,7 +57,7 @@ def create_tooltip_html(loc):
         
         html_parts.append(f'<b>{person["name"]}</b><br>')
         if person['degree']:
-            html_parts.append(f'{person["degree"]}<br>')        
+            html_parts.append(f'🎓 {person["degree"]}<br>')        
         if person['email']:
             html_parts.append(f'📧 {person["email"]}<br>')
     
@@ -74,7 +74,7 @@ def main():
     
     st.markdown(
         "Click on any marker to see contact information for providers in that city.  "
-        "This data was pulled from the [ESDM website](https://www.esdm.co/esdm-therapists)  "
+        "This data was pulled from the [ESDM website](https://www.esdm.co/esdm-therapists).  "
         "It was made by Field Cady (field.cady@gmail.com) to help other autism parents find  "
         "resources for their children.  Please contact him with questions or feedback.")
 
@@ -179,7 +179,7 @@ def main():
                     if person['email']:
                         st.markdown(f"📧 {person['email']}")
                     if person['degree']:
-                        st.markdown(f"📞 {person['degree']}")
+                        st.markdown(f"🎓 {person['degree']}")
                     st.markdown("---")
 
 if __name__ == "__main__":
