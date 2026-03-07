@@ -14,7 +14,7 @@ st.set_page_config(
 def load_contacts():
     """Load contact data from JSON lines file"""
     df = pd.read_csv('data_w_latlon.tsv', sep='\t')
-    return df.to_dict(orient='records')
+    return df.fillna("").to_dict(orient='records')
 
 def aggregate_by_location(contacts):
     """Group contacts by location"""
@@ -80,7 +80,7 @@ def main():
 
     st.markdown("Sorry if it takes a minute to load!")
 
-    st.markdown("The data was last updated Feb 16, 2026.")
+    st.markdown("The data was last updated March 6, 2026.")
     
     # Load data
     contacts = load_contacts()
