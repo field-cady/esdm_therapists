@@ -14,7 +14,15 @@ st.set_page_config(
 def load_contacts():
     """Load contact data from JSON lines file"""
     df = pd.read_csv('data_w_latlon.tsv', sep='\t')
-    return df.fillna("").to_dict(orient='records')
+    # Fill NaN with empty string only for text columns
+    text_cols = ['First Name', 'Last Name', 'Degree', 'Email', 'City', 'State', 'Country']
+    for col in text_cols:
+        if col in df.columns:
+            df[col] = df[col].fillna("")
+    
+    # Drop rows where lat/lon is missing to avoid mapping errors
+    df = df.dropna(subset=['lat', 'lon'])
+    return df.to_dict(orient='records')
 
 def aggregate_by_location(contacts):
     """Group contacts by location"""
