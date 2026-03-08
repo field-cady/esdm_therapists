@@ -26,8 +26,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install playwright
-          playwright install chromium
-          sudo playwright install-deps chromium
+          python -m playwright install --with-deps chromium
           # add_latlon.py uses standard libraries (urllib, json, csv), so no extra pip installs are needed for it.
 
       - name: Scrape ESDM Therapists
