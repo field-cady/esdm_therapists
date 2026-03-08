@@ -88,7 +88,7 @@ def main():
 
     st.markdown("Sorry if it takes a minute to load!")
 
-    st.markdown("The data was last updated March 6, 2026.")
+    st.markdown("The data was last updated March 8, 2026.")
     
     # Load data
     contacts = load_contacts()
