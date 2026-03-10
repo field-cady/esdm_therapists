@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESDM Therapists Contact Map</title>
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; display: flex; height: 100vh; overflow: hidden; }
+        #sidebar { width: 350px; background: #f8f9fa; border-right: 1px solid #ddd; display: flex; flex-direction: column; height: 100%; box-sizing: border-box; }
+        #map-container { flex-grow: 1; height: 100%; position: relative; display: flex; flex-direction: column;}
+        #map { flex-grow: 1; width: 100%; }
+        .header { padding: 20px; border-bottom: 1px solid #ddd; background: white; }
+        .header h1 { margin: 0 0 10px 0; font-size: 24px; }
+        .header p { margin: 0 0 10px 0; font-size: 14px; color: #555; line-height: 1.4; }
+        .stats { display: flex; gap: 20px; padding: 15px 20px; background: white; border-bottom: 1px solid #ddd; }
+        .stat-box { display: flex; flex-direction: column; }
+        .stat-label { font-size: 12px; color: #666; text-transform: uppercase; }
+        .stat-value { font-size: 24px; font-weight: bold; color: #0066cc; }
+        .search-box { padding: 15px 20px; border-bottom: 1px solid #ddd; background: white; }
+        .search-box input { width: 100%; padding: 8px 12px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; }
+        #contact-list { flex-grow: 1; overflow-y: auto; padding: 0; margin: 0; list-style: none; }
+        .city-group { border-bottom: 1px solid #eee; }
+        .city-header { padding: 15px 20px; cursor: pointer; background: #fff; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
+        .city-header:hover { background: #f1f1f1; }
+        .city-people { display: none; padding: 0 20px 15px 20px; background: #fff; }
+        .city-group.expanded .city-people { display: block; }
+        .person { padding: 10px 0; border-bottom: 1px solid #f0f0f0; }
+        .person:last-child { border-bottom: none; }
+        .person-name { font-weight: bold; margin-bottom: 4px; }
+        .person-detail { font-size: 13px; color: #555; margin-bottom: 2px; }
+        .person-detail a { color: #0066cc; text-decoration: none; }
+        .person-detail a:hover { text-decoration: underline; }
+        /* Map popup styling */
+        .leaflet-popup-content-wrapper { border-radius: 4px; }
+        .popup-content { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; font-size: 14px; max-height: 300px; overflow-y: auto; }
+        .popup-content b { display: block; margin-top: 8px; }
+        .popup-content hr { margin: 8px 0; border: 0; border-top: 1px solid #eee; }
+        .map-overlay { position: absolute; top: 10px; left: 50px; z-index: 1000; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 450px; }
+        .map-overlay h1 { margin: 0 0 10px 0; font-size: 22px;}
+        .map-overlay p { margin: 0 0 10px 0; font-size: 14px; line-height: 1.5; color: #444;}
+        .map-overlay a { color: #0066cc; text-decoration: none; }
+        .map-overlay a:hover { text-decoration: underline; }
+        @media (max-width: 768px) {
+            body { flex-direction: column; }
+            #sidebar { width: 100%; height: 50vh; order: 2; }
+            #map-container { height: 50vh; order: 1; }
+            .map-overlay { display: none; } /* Hide overlay on small screens */
+        }
+    </style>
+</head>
+<body>
+
+<div id="sidebar">
+    <div class="header">
+        <h1>All Contacts</h1>
+    </div>
+    <div class="stats">
+        <div class="stat-box">
+            <span class="stat-label">Total Therapists</span>
+            <span class="stat-value" id="stat-therapists">0</span>
+        </div>
+        <div class="stat-box">
+            <span class="stat-label">Cities</span>
+            <span class="stat-value" id="stat-cities">0</span>
+        </div>
+    </div>
+    <div class="search-box">
+        <input type="text" id="search-input" placeholder="🔍 Search Name, email, ...">
+    </div>
+    <div id="contact-list">
+        <!-- List gets populated here -->
+    </div>
+</div>
+
+<div id="map-container">
+    <div class="map-overlay">
+        <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleOverlay()">
+            <h1 style="margin: 0; font-size: 20px;">📍 ESDM Therapists</h1>
+            <button id="toggle-btn" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #444; padding: 0; margin-left: 15px; line-height: 1;">−</button>
+        </div>
+        <div id="overlay-content" style="margin-top: 15px;">
+            <p>ESDM (Early Start Denver Model) is a play-based therapy for children on the autism spectrum. This app is designed to help you find providers.</p>
+            <p>Click on any marker to see contact information for providers in that city. This data was pulled from the <a href="https://www.esdm.co/esdm-therapists" target="_blank">ESDM website</a>. It was made by Field Cady (field.cady@gmail.com) to help other autism parents find resources for their children. Please contact him with questions or feedback.</p>
+            <p style="color: #666; font-size: 12px; margin-bottom: 0;">The data was last updated March 6, 2026.</p>
+        </div>
+    </div>
+    <div id="map"></div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script>
+    // Initialize Map
+    const map = L.map('map').setView([37.7749, -122.4194], 2);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
+    }).addTo(map);
+
+    let allLocations = [];
+    let markersLayer = L.layerGroup().addTo(map);
+
+    // Load data
+    Papa.parse('data_w_latlon.tsv', {
+        download: true,
+        header: true,
+        delimiter: '\t',
+        skipEmptyLines: true,
+        complete: function(results) {
+            processData(results.data);
+        }
+    });
+
+    function processData(data) {
+        const locationDict = {};
+        let totalTherapists = 0;
+
+        data.forEach(row => {
+            if (!row.lat || !row.lon) return;
+            
+            const lat = parseFloat(row.lat);
+            const lon = parseFloat(row.lon);
+            const key = `${lat},${lon}`;
+            
+            if (!locationDict[key]) {
+                const parts = [row['City'], row['State'], row['Country']].filter(p => p && p.trim());
+                locationDict[key] = {
+                    lat: lat,
+                    lon: lon,
+                    city: parts.join(', '),
+                    people: []
+                };
+            }
+            
+            const firstName = row['First Name'] || '';
+            const lastName = row['Last Name'] || '';
+            
+            locationDict[key].people.push({
+                name: `${firstName} ${lastName}`.trim(),
+                email: row['Email'] || '',
+                degree: row['Degree'] || ''
+            });
+            totalTherapists++;
+        });
+
+        allLocations = Object.values(locationDict);
+        
+        // Update stats
+        document.getElementById('stat-therapists').textContent = totalTherapists;
+        document.getElementById('stat-cities').textContent = allLocations.length;
+
+        // Center map
+        if (allLocations.length > 0) {
+            const bounds = L.latLngBounds(allLocations.map(loc => [loc.lat, loc.lon]));
+            map.fitBounds(bounds, { padding: [50, 50], maxZoom: 10 });
+        }
+
+        renderMap(allLocations);
+        renderSidebar(allLocations);
+    }
+
+    function createPopupHtml(loc) {
+        let html = `<div class="popup-content"><strong>${loc.city}</strong><br>`;
+        loc.people.forEach((person, i) => {
+            if (i > 0) html += '<hr>';
+            html += `<b>${person.name}</b><br>`;
+            if (person.degree) html += `🎓 ${person.degree}<br>`;
+            if (person.email) html += `📧 <a href="mailto:${person.email}">${person.email}</a><br>`;
+        });
+        html += '</div>';
+        return html;
+    }
+
+    function renderMap(locations) {
+        markersLayer.clearLayers();
+        locations.forEach(loc => {
+            const marker = L.circleMarker([loc.lat, loc.lon], {
+                radius: Math.min(Math.max(loc.people.length * 3 + 3, 8), 25),
+                fillColor: "#e63946",
+                color: "#e63946",
+                weight: 1,
+                opacity: 1,
+                fillOpacity: 0.6
+            });
+            marker.bindPopup(createPopupHtml(loc));
+            markersLayer.addLayer(marker);
+        });
+    }
+
+    function renderSidebar(locations, searchText = '') {
+        const container = document.getElementById('contact-list');
+        container.innerHTML = '';
+        
+        const searchLower = searchText.toLowerCase();
+
+        // Sort locations alphabetically
+        const sortedLocations = [...locations].sort((a, b) => a.city.localeCompare(b.city));
+
+        sortedLocations.forEach(loc => {
+            // Filter people in this location
+            const filteredPeople = loc.people.filter(person => {
+                const searchStr = `${person.name} ${person.email} ${person.degree}`.toLowerCase();
+                return searchStr.includes(searchLower);
+            });
+
+            if (filteredPeople.length === 0) return;
+
+            const groupDiv = document.createElement('div');
+            groupDiv.className = 'city-group';
+            if (searchLower) groupDiv.classList.add('expanded'); // Auto-expand if searching
+
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'city-header';
+            headerDiv.innerHTML = `<span>📍 ${loc.city}</span> <span style="color:#888;font-size:12px;">(${filteredPeople.length})</span>`;
+            headerDiv.onclick = () => groupDiv.classList.toggle('expanded');
+
+            const peopleDiv = document.createElement('div');
+            peopleDiv.className = 'city-people';
+            
+            filteredPeople.forEach(person => {
+                const pDiv = document.createElement('div');
+                pDiv.className = 'person';
+                
+                let html = `<div class="person-name">${person.name}</div>`;
+                if (person.email) html += `<div class="person-detail">📧 <a href="mailto:${person.email}">${person.email}</a></div>`;
+                if (person.degree) html += `<div class="person-detail">🎓 ${person.degree}</div>`;
+                
+                pDiv.innerHTML = html;
+                peopleDiv.appendChild(pDiv);
+            });
+
+            groupDiv.appendChild(headerDiv);
+            groupDiv.appendChild(peopleDiv);
+            container.appendChild(groupDiv);
+        });
+    }
+
+    document.getElementById('search-input').addEventListener('input', (e) => {
+        renderSidebar(allLocations, e.target.value);
+    });
+
+    function toggleOverlay() {
+        const content = document.getElementById('overlay-content');
+        const btn = document.getElementById('toggle-btn');
+        if (content.style.display === 'none') {
+            content.style.display = 'block';
+            btn.textContent = '−';
+        } else {
+            content.style.display = 'none';
+            btn.textContent = '+';
+        }
+    }
+
+</script>
+</body>
+</html>
