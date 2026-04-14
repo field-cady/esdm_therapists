@@ -90,6 +90,13 @@ def main():
 
     st.markdown("The data was last updated April 1, 2026.")
     
+    st.markdown(
+        """<a href="https://www.buymeacoffee.com/field.cady" target="_blank">
+        <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 40px !important;width: 145px !important;" >
+        </a>""",
+        unsafe_allow_html=True
+    )
+
     # Load data
     contacts = load_contacts()
     locations = aggregate_by_location(contacts)
@@ -165,6 +172,13 @@ def main():
     # Sidebar with all contacts
     with st.sidebar:
         st.header("All Contacts")
+        
+        st.markdown(
+            """<a href="https://www.buymeacoffee.com/field.cady" target="_blank">
+            <img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 40px !important;width: 145px !important;" >
+            </a><br><br>""",
+            unsafe_allow_html=True
+        )
         
         search = st.text_input("🔍 Search", placeholder="Name, email, ...")
         
