@@ -88,7 +88,7 @@ def main():
 
     st.markdown("Sorry if it takes a minute to load!")
 
-    st.markdown("The data was last updated April 1, 2026.")
+    st.markdown("The data was last updated May 1, 2026.")
     
     st.markdown(
         """<a href="https://www.buymeacoffee.com/field.cady" target="_blank">
